@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trench Commander - WWI Survival Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Georgia, serif;
+            background: linear-gradient(to bottom, #2d2416, #1a1410);
+            min-height: 100vh;
+            color: #fef3c7;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Main Menu Styles */
+        #main-menu {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.1' /%3E%3C/svg%3E");
+        }
+
+        .menu-container {
+            max-width: 800px;
+            width: 100%;
+            background: linear-gradient(to bottom, #fef3c7, #e7e5e4);
+            border: 6px solid #1c1917;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05' /%3E%3C/svg%3E");
+        }
+
+        .menu-title {
+            font-family: 'Courier New', monospace;
+            font-size: 4rem;
+            font-weight: bold;
+            text-align: center;
+            color: #1c1917;
+            letter-spacing: 0.15em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+            line-height: 1.1;
+        }
+
+        .menu-subtitle {
+            text-align: center;
+            color: #000000;
+            font-style: italic;
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .menu-divider {
+            height: 3px;
+            background: #7c2d12;
+            margin: 30px auto;
+            width: 200px;
+        }
+
+        .menu-description {
+            color: #000000;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            font-size: 1.3rem;
+            font-weight: 500;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .menu-objectives {
+            background: rgba(28, 25, 23, 0.1);
+            border: 2px solid #57534e;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-objectives h3 {
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #000000;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .menu-objectives ul {
+            list-style: none;
+            color: #292524;
+        }
+
+        .menu-objectives li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #000000;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .menu-objectives li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #7c2d12;
+        }
+
+        .start-button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            background: #1c1917;
+            color: #fef3c7;
+            border: 3px solid #292524;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover {
+            background: #292524;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        /* Game Styles */
+        #game-screen {
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-family: 'Courier New', monospace;
+            font-size: 3.5rem;
+            font-weight: bold;
+            letter-spacing: 0.15em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .game-subtitle {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #7c2d12;
+            color: #fef3c7;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            border: 2px solid #92400e;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: linear-gradient(to bottom, #fef3c7, #e7e5e4);
+            padding: 25px;
+            border: 4px solid #1c1917;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05' /%3E%3C/svg%3E");
+        }
+
+        .panel-title {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #000000;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #57534e;
+        }
+
+        .stat-bar {
+            margin-bottom: 20px;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #000000;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .stat-track {
+            height: 8px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(0,0,0,0.4);
+        }
+
+        .stat-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .stat-fill.high {
+            background: #15803d;
+        }
+
+        .stat-fill.medium {
+            background: #a16207;
+        }
+
+        .stat-fill.low {
+            background: #991b1b;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #d6d3d1;
+        }
+
+        .info-label {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #000000;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1c1917;
+        }
+
+        .info-value.danger {
+            color: #991b1b;
+        }
+
+        .event-card {
+            background: linear-gradient(to bottom, #fef3c7, #e7e5e4);
+            padding: 35px;
+            border: 4px solid #1c1917;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            margin-bottom: 30px;
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05' /%3E%3C/svg%3E");
+        }
+
+        .event-title-wrap {
+            border-left: 4px solid #7c2d12;
+            padding-left: 15px;
+            margin-bottom: 25px;
+        }
+
+        .event-title {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #000000;
+        }
+
+        .event-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: #000000;
+            font-style: italic;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choice-button {
+            padding: 16px;
+            background: #1c1917;
+            color: #fef3c7;
+            border: 2px solid #292524;
+            font-family: Georgia, serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .choice-button:hover {
+            background: #292524;
+            transform: translateX(4px);
+        }
+
+        .choice-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .choice-effects {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-family: 'Courier New', monospace;
+            transition: opacity 0.2s;
+        }
+
+        .choice-button:hover .choice-effects {
+            opacity: 1;
+        }
+
+        .log-panel {
+            background: linear-gradient(to bottom, #1c1917, #0c0a09);
+            padding: 25px;
+            border: 4px solid #1c1917;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .log-title {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #fef3c7;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #92400e;
+        }
+
+        .log-entry {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: rgba(254, 243, 199, 0.95);
+            border-left: 2px solid rgba(146, 64, 14, 0.5);
+            padding: 8px 0 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        /* End Screen */
+        #end-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .end-container {
+            max-width: 700px;
+            width: 100%;
+            background: linear-gradient(to bottom, #fef3c7, #e7e5e4);
+            padding: 50px;
+            border: 4px solid #1c1917;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05' /%3E%3C/svg%3E");
+        }
+
+        .end-icon {
+            text-align: center;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .end-title {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #1c1917;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+
+        .end-divider {
+            height: 3px;
+            width: 150px;
+            background: #7c2d12;
+            margin: 20px auto;
+        }
+
+        .end-message {
+            background: rgba(28, 25, 23, 0.1);
+            border: 2px solid #57534e;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .end-message p {
+            font-size: 1.25rem;
+            color: #000000;
+            line-height: 1.6;
+            font-style: italic;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .end-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .end-stat {
+            background: rgba(87, 83, 78, 0.2);
+            border: 1px solid #57534e;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .end-stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1c1917;
+            margin-bottom: 5px;
+        }
+
+        .end-stat-value.danger {
+            color: #991b1b;
+        }
+
+        .end-stat-label {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .restart-button {
+            width: 100%;
+            padding: 20px;
+            background: #1c1917;
+            color: #fef3c7;
+            border: 3px solid #292524;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-button:hover {
+            background: #292524;
+        }
+
+        @media (max-width: 768px) {
+            .menu-title {
+                font-size: 2.5rem;
+            }
+
+            .game-title {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .end-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Menu -->
+    <div id="main-menu">
+        <div class="menu-container">
+            <h1 class="menu-title">TRENCH COMMANDER</h1>
+            <p class="menu-subtitle">The Western Front, 1916</p>
+            
+            <div class="menu-divider"></div>
+            
+            <p class="menu-description">
+                You are a junior officer managing Section 12-B. Your predecessor was "transferred to a desk job." 
+                His boots are still in the dugout. Survive the absurdity of trench warfare through cunning, 
+                compromise, and the occasional creative interpretation of orders.
+            </p>
+            
+            <div class="menu-objectives">
+                <h3>Your Mission</h3>
+                <ul>
+                    <li>Manage <strong>Morale</strong>, <strong>Supplies</strong>, and <strong>Readiness</strong></li>
+                    <li>Navigate orders from High Command (miles behind the lines)</li>
+                    <li>Endure probing attacks, weather, and the bureaucracy of war</li>
+                    <li>Keep your men alive as long as possible</li>
+                    <li>Avoid mutiny, starvation, and being overrun</li>
+                </ul>
+            </div>
+            
+            <button class="start-button" onclick="startGame()">Deploy to the Front</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="hidden">
+        <div class="game-container">
+            <div class="game-header">
+                <h1 class="game-title">TRENCH COMMANDER</h1>
+                <div class="game-subtitle">Section 12-B • The Western Front</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="panel">
+                    <div class="panel-title">Status Report</div>
+                    <div class="stat-bar">
+                        <div class="stat-header">
+                            <span class="stat-label">⚔ Morale</span>
+                            <span class="stat-value" id="morale-value">70%</span>
+                        </div>
+                        <div class="stat-track">
+                            <div class="stat-fill high" id="morale-bar" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-header">
+                            <span class="stat-label">📦 Supplies</span>
+                            <span class="stat-value" id="supplies-value">60%</span>
+                        </div>
+                        <div class="stat-track">
+                            <div class="stat-fill medium" id="supplies-bar" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-header">
+                            <span class="stat-label">🛡 Readiness</span>
+                            <span class="stat-value" id="readiness-value">50%</span>
+                        </div>
+                        <div class="stat-track">
+                            <div class="stat-fill medium" id="readiness-bar" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">Intelligence</div>
+                    <div class="info-item">
+                        <span class="info-label">Day</span>
+                        <span class="info-value" id="day-value">1</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Casualties</span>
+                        <span class="info-value danger" id="casualties-value">0</span>
+                    </div>
+                    <div style="padding-top: 15px; color: #000000; font-size: 1rem; font-weight: 500;">
+                        <span style="margin-right: 8px;">📡</span>
+                        <span style="font-style: italic;">Last wire from HQ: 3 hours ago</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-card" id="event-card">
+                <div class="event-title-wrap">
+                    <h3 class="event-title" id="event-title">LOADING...</h3>
+                </div>
+                <p class="event-text" id="event-text">Preparing your orders...</p>
+                <div class="choices" id="choices"></div>
+            </div>
+
+            <div class="log-panel">
+                <div class="log-title">Commander's Log</div>
+                <div id="log-entries"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="hidden">
+        <div class="end-container">
+            <div class="end-icon" id="end-icon">☠️</div>
+            <h1 class="end-title" id="end-title">POSITION LOST</h1>
+            <div class="end-divider"></div>
+            <div class="end-message">
+                <p id="end-message">The wire is cut. The parapets breached. You fought well. Now run.</p>
+            </div>
+            <div class="end-stats">
+                <div class="end-stat">
+                    <div class="end-stat-value" id="end-days">1</div>
+                    <div class="end-stat-label">Days Survived</div>
+                </div>
+                <div class="end-stat">
+                    <div class="end-stat-value danger" id="end-casualties">0</div>
+                    <div class="end-stat-label">Casualties</div>
+                </div>
+            </div>
+            <button class="restart-button" onclick="restartGame()">Return to the Front</button>
+        </div>
+    </div>
+
+    <script>
+        const events = [
+            {
+                title: "TELEGRAM FROM H.Q.",
+                text: "\"ATTACK AT DAWN STOP ADVANCE 500 YARDS STOP GOOD LUCK STOP\" - General Melchett sends his regards from the château.",
+                choices: [
+                    { text: "Delay: 'Awaiting optimal conditions, sir'", morale: -5, supplies: 0, readiness: -5 },
+                    { text: "Obey: Lead the charge yourself", morale: -20, supplies: -10, readiness: -30 },
+                    { text: "Misplace: 'Telegraph must be faulty, sir'", morale: 5, supplies: 0, readiness: 5 }
+                ]
+            },
+            {
+                title: "PROBING ATTACK",
+                text: "Fritz is testing our wire. Small arms fire echoing across no-man's land. The men are jumpy.",
+                choices: [
+                    { text: "Stand to: Full alert", morale: -10, supplies: -5, readiness: 10 },
+                    { text: "Ignore: 'Probably just rats, lads'", morale: 5, supplies: 0, readiness: -15 },
+                    { text: "Artillery: Request a barrage", morale: 0, supplies: -15, readiness: 5 }
+                ]
+            },
+            {
+                title: "THE RAIN",
+                text: "It's been raining for three days. The trench is becoming a river. Private Baldrick suggests building an ark.",
+                choices: [
+                    { text: "Drainage detail: All hands to work", morale: -15, supplies: -5, readiness: -10 },
+                    { text: "Endure it: 'Builds character'", morale: -10, supplies: 0, readiness: -5 },
+                    { text: "Move positions: Request relocation", morale: 10, supplies: 0, readiness: -20 }
+                ]
+            },
+            {
+                title: "SUPPLY WAGON",
+                text: "Supplies have arrived! One week's rations, ammunition, and... a crate of mustache wax for the General.",
+                choices: [
+                    { text: "Distribute fairly", morale: 5, supplies: 20, readiness: 5 },
+                    { text: "Hoard for emergencies", morale: -10, supplies: 30, readiness: 0 },
+                    { text: "'Accidentally' lose the wax", morale: 15, supplies: 20, readiness: 0 }
+                ]
+            },
+            {
+                title: "CHAPLAIN'S VISIT",
+                text: "The padre offers communion and talks about 'glorious sacrifice.' The men look uncomfortable.",
+                choices: [
+                    { text: "Attend service: Maintain appearances", morale: 10, supplies: 0, readiness: 0 },
+                    { text: "Excuse yourself: 'Urgent tactical matters'", morale: -5, supplies: 0, readiness: 5 },
+                    { text: "Request rum ration instead", morale: 20, supplies: -10, readiness: -5 }
+                ]
+            },
+            {
+                title: "SUSPICIOUS QUIET",
+                text: "The German guns have been silent for 12 hours. This is either very good or very, very bad.",
+                choices: [
+                    { text: "Reconnaissance: Send out a patrol", morale: -10, supplies: -5, readiness: 15 },
+                    { text: "Fortify: Strengthen positions", morale: -5, supplies: -10, readiness: 20 },
+                    { text: "Wait and see: 'Perhaps they've gone home'", morale: 0, supplies: 0, readiness: -15 }
+                ]
+            },
+            {
+                title: "FRESH REPLACEMENTS",
+                text: "Twelve eager young men arrive, fresh from training. They still think it'll be over by Christmas.",
+                choices: [
+                    { text: "Welcome them: Build camaraderie", morale: 15, supplies: -5, readiness: -10 },
+                    { text: "Harsh truth: Prepare them mentally", morale: -10, supplies: 0, readiness: 10 },
+                    { text: "Assign them to Corporal Jones", morale: 5, supplies: 0, readiness: 5 }
+                ]
+            },
+            {
+                title: "MEDICAL SITUATION",
+                text: "Trench foot is spreading. The medical officer suggests 'keeping feet dry.' Brilliant.",
+                choices: [
+                    { text: "Strict foot inspections", morale: -15, supplies: -5, readiness: 10 },
+                    { text: "Rotate men to rear positions", morale: 10, supplies: 0, readiness: -20 },
+                    { text: "Requisition more socks", morale: 0, supplies: -10, readiness: 0 }
+                ]
+            },
+            {
+                title: "ENEMY ARTILLERY",
+                text: "German 77s bracketing the line. Shells screaming overhead. Someone's counting impacts. Up to forty-seven.",
+                choices: [
+                    { text: "Take cover: Hunker down", morale: -15, supplies: 0, readiness: -10 },
+                    { text: "Counter-battery: Radio coordinates", morale: 0, supplies: -15, readiness: 5 },
+                    { text: "Endure stoically: Stiff upper lip", morale: -5, supplies: 0, readiness: -5 }
+                ]
+            },
+            {
+                title: "RATS",
+                text: "The rats are getting bolder. Private Perkins swears one saluted him. The men are naming them.",
+                choices: [
+                    { text: "Extermination campaign", morale: 5, supplies: -5, readiness: -5 },
+                    { text: "Accept them: 'Better rats than HQ'", morale: 10, supplies: 0, readiness: 0 },
+                    { text: "Set traps: Use spare rations", morale: -5, supplies: -10, readiness: 5 }
+                ]
+            },
+            {
+                title: "INSPECTION NOTICE",
+                text: "A general is visiting tomorrow to 'boost morale.' This means cleaning everything that doesn't move.",
+                choices: [
+                    { text: "Full spit and polish", morale: -20, supplies: -5, readiness: -15 },
+                    { text: "Minimal effort: He won't notice mud", morale: -5, supplies: 0, readiness: 0 },
+                    { text: "Fake illness: 'Possible influenza, sir'", morale: 10, supplies: 0, readiness: -5 }
+                ]
+            },
+            {
+                title: "MYSTERIOUS PACKAGE",
+                text: "Your mother sent a parcel: wool socks, fruitcake, and a photo of your childhood dog. The men gather round.",
+                choices: [
+                    { text: "Share everything", morale: 25, supplies: 5, readiness: 0 },
+                    { text: "Keep socks, share cake", morale: 15, supplies: 5, readiness: 5 },
+                    { text: "Private moment: Hide in dugout", morale: 5, supplies: 0, readiness: 0 }
+                ]
+            },
+            {
+                title: "NIGHT PATROL",
+                text: "HQ wants intelligence on enemy positions. Someone needs to crawl through no-man's land in the dark.",
+                choices: [
+                    { text: "Volunteer yourself: Lead by example", morale: 10, supplies: 0, readiness: -10 },
+                    { text: "Send veterans: They know the ground", morale: -5, supplies: 0, readiness: 10 },
+                    { text: "Delay: 'Weather unsuitable, sir'", morale: 0, supplies: 0, readiness: -5 }
+                ]
+            },
+            {
+                title: "GAS ALARM",
+                text: "Yellow-green cloud drifting across no-man's land. The cry goes up: 'GAS! GAS! GAS!'",
+                choices: [
+                    { text: "Masks on: Disciplined response", morale: -10, supplies: -5, readiness: 15 },
+                    { text: "Panic drill: Everyone scrambles", morale: -20, supplies: 0, readiness: -10 },
+                    { text: "False alarm: Just morning mist", morale: 5, supplies: 0, readiness: -15 }
+                ]
+            },
+            {
+                title: "DESERTER CAUGHT",
+                text: "Private Williams tried to walk home. The military police brought him back. The men are watching.",
+                choices: [
+                    { text: "By the book: Court martial", morale: -15, supplies: 0, readiness: 10 },
+                    { text: "Mercy: Extra duties only", morale: 10, supplies: 0, readiness: -10 },
+                    { text: "Understanding: 'He needed fresh air'", morale: 15, supplies: 0, readiness: -15 }
+                ]
+            }
+        ];
+
+        const endings = {
+            mutiny: {
+                title: "MUTINY",
+                message: "The men have had enough. Rifles lowered, they walk toward the rear. Court-martial awaits.",
+                icon: "⚠️"
+            },
+            starvation: {
+                title: "SUPPLY FAILURE",
+                message: "Empty bellies, empty magazines. The position is untenable. Withdrawal ordered.",
+                icon: "📦"
+            },
+            overrun: {
+                title: "POSITION LOST",
+                message: "The wire is cut. The parapets breached. You fought well. Now run.",
+                icon: "☠️"
+            },
+            decimated: {
+                title: "RELIEVED",
+                message: "What remains of your company stumbles to the rear. You survived. Most didn't.",
+                icon: "💀"
+            }
+        };
+
+        let gameState = {
+            day: 1,
+            morale: 70,
+            supplies: 60,
+            readiness: 50,
+            casualties: 0,
+            status: 'playing',
+            currentEvent: null,
+            log: ['You arrive at Section 12-B. The previous commander "transferred to a desk job." His boots are still in the dugout.']
+        };
+
+        function startGame() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            gameState.currentEvent = getRandomEvent();
+            updateUI();
+        }
+
+        function getRandomEvent() {
+            return events[Math.floor(Math.random() * events.length)];
+        }
+
+        function updateUI() {
+            // Update stats
+            updateStat('morale', gameState.morale);
+            updateStat('supplies', gameState.supplies);
+            updateStat('readiness', gameState.readiness);
+
+            // Update info
+            document.getElementById('day-value').textContent = gameState.day;
+            document.getElementById('casualties-value').textContent = gameState.casualties;
+
+            // Update event
+            if (gameState.currentEvent) {
+                document.getElementById('event-title').textContent = gameState.currentEvent.title;
+                document.getElementById('event-text').textContent = gameState.currentEvent.text;
+
+                const choicesDiv = document.getElementById('choices');
+                choicesDiv.innerHTML = '';
+
+                gameState.currentEvent.choices.forEach((choice, idx) => {
+                    const button = document.createElement('button');
+                    button.className = 'choice-button';
+                    button.onclick = () => makeChoice(choice);
+
+                    const effects = [];
+                    if (choice.morale !== 0) effects.push(`Morale ${choice.morale > 0 ? '+' : ''}${choice.morale}`);
+                    if (choice.supplies !== 0) effects.push(`Supplies ${choice.supplies > 0 ? '+' : ''}${choice.supplies}`);
+                    if (choice.readiness !== 0) effects.push(`Ready ${choice.readiness > 0 ? '+' : ''}${choice.readiness}`);
+
+                    button.innerHTML = `
+                        <span class="choice-text">${choice.text}</span>
+                        <span class="choice-effects">${effects.join(' • ')}</span>
+                    `;
+
+                    choicesDiv.appendChild(button);
+                });
+            }
+
+            // Update log
+            const logDiv = document.getElementById('log-entries');
+            logDiv.innerHTML = '';
+            gameState.log.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.textContent = entry;
+                logDiv.appendChild(div);
+            });
+        }
+
+        function updateStat(name, value) {
+            const valueElem = document.getElementById(`${name}-value`);
+            const barElem = document.getElementById(`${name}-bar`);
+
+            valueElem.textContent = value + '%';
+            barElem.style.width = value + '%';
+
+            barElem.className = 'stat-fill';
+            if (value > 60) {
+                barElem.classList.add('high');
+            } else if (value > 30) {
+                barElem.classList.add('medium');
+            } else {
+                barElem.classList.add('low');
+            }
+        }
+
+        function makeChoice(choice) {
+            const newMorale = Math.max(0, Math.min(100, gameState.morale + choice.morale));
+            const newSupplies = Math.max(0, Math.min(100, gameState.supplies + choice.supplies));
+            const newReadiness = Math.max(0, Math.min(100, gameState.readiness + choice.readiness));
+
+            // Random casualties
+            const casualtyRoll = Math.random() * 100;
+            let newCasualties = gameState.casualties;
+            if (casualtyRoll > newReadiness + newMorale / 2) {
+                newCasualties += Math.floor(Math.random() * 3) + 1;
+            }
+
+            // Check for game over
+            let status = 'playing';
+            let logEntry = `Day ${gameState.day}: ${choice.text}`;
+
+            if (newMorale <= 0) {
+                status = 'mutiny';
+                logEntry = "The men refuse to fight. It's over.";
+            } else if (newSupplies <= 0) {
+                status = 'starvation';
+                logEntry = "Out of supplies. The line cannot hold.";
+            } else if (newReadiness <= 0) {
+                status = 'overrun';
+                logEntry = "Position overrun. Fritz is in the trench.";
+            } else if (newCasualties >= 50) {
+                status = 'decimated';
+                logEntry = "Too many casualties. You're being relieved.";
+            }
+
+            gameState.morale = newMorale;
+            gameState.supplies = newSupplies;
+            gameState.readiness = newReadiness;
+            gameState.casualties = newCasualties;
+            gameState.day = gameState.day + 1;
+            gameState.status = status;
+            gameState.log = [logEntry, ...gameState.log.slice(0, 4)];
+
+            if (status === 'playing') {
+                gameState.currentEvent = getRandomEvent();
+                updateUI();
+            } else {
+                showEndScreen(status);
+            }
+        }
+
+        function showEndScreen(status) {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+
+            const ending = endings[status];
+            document.getElementById('end-icon').textContent = ending.icon;
+            document.getElementById('end-title').textContent = ending.title;
+            document.getElementById('end-message').textContent = ending.message;
+            document.getElementById('end-days').textContent = gameState.day;
+            document.getElementById('end-casualties').textContent = gameState.casualties;
+        }
+
+        function restartGame() {
+            gameState = {
+                day: 1,
+                morale: 70,
+                supplies: 60,
+                readiness: 50,
+                casualties: 0,
+                status: 'playing',
+                currentEvent: getRandomEvent(),
+                log: ['You arrive at Section 12-B. The previous commander "transferred to a desk job." His boots are still in the dugout.']
+            };
+
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            updateUI();
+        }
+    </script>
+</body>
+</html>
